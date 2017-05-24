@@ -1,0 +1,9 @@
+C:\Users\tzeki\VB_shared\projs\ratty\da_rat\bin\Debug\netcoreapp2.0\da_rat.deps.json
+C:\Users\tzeki\VB_shared\projs\ratty\da_rat\bin\Debug\netcoreapp2.0\da_rat.runtimeconfig.json
+C:\Users\tzeki\VB_shared\projs\ratty\da_rat\bin\Debug\netcoreapp2.0\da_rat.runtimeconfig.dev.json
+C:\Users\tzeki\VB_shared\projs\ratty\da_rat\bin\Debug\netcoreapp2.0\da_rat.dll
+C:\Users\tzeki\VB_shared\projs\ratty\da_rat\bin\Debug\netcoreapp2.0\da_rat.pdb
+C:\Users\tzeki\VB_shared\projs\ratty\da_rat\obj\Debug\netcoreapp2.0\da_rat.csproj.CoreCompileInputs.cache
+C:\Users\tzeki\VB_shared\projs\ratty\da_rat\obj\Debug\netcoreapp2.0\da_rat.AssemblyInfo.cs
+C:\Users\tzeki\VB_shared\projs\ratty\da_rat\obj\Debug\netcoreapp2.0\da_rat.dll
+C:\Users\tzeki\VB_shared\projs\ratty\da_rat\obj\Debug\netcoreapp2.0\da_rat.pdb
