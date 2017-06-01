@@ -10,6 +10,8 @@ namespace da_rat
     class Rat
     {
         private static ManualResetEvent _connectDone = new ManualResetEvent(false);
+
+        private static byte[] _buffer = new byte[2048];
         private static Socket _clientSocket =
             new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
         
@@ -44,36 +46,32 @@ namespace da_rat
                 Console.WriteLine("Socket connected to {0}",
                     client.RemoteEndPoint.ToString());
 
+                client.BeginReceive(_buffer, 0, _buffer.Length, SocketFlags.None, new AsyncCallback(ReceiveCallback), client);
+
                 _connectDone.Set();
             } catch (Exception e) { Console.WriteLine(e.ToString()); }
         }
 
-        /* TODO: RECEIVE CALLBACK
-        ***********************************************************/
-
-/* OldConn
-        private static void LoopConnect()
+        private static void ReceiveCallback(IAsyncResult AR)
         {
-            int attempts = 0;
+            Socket socket = (Socket)AR.AsyncState;
 
-            while(!_clientSocket.Connected)
+            try
             {
-                try
-                {
-                    attempts += 1;
-                    _clientSocket.Connect(IPAddress.Loopback, 1337); // Change loopback with main IP
-                }
-                catch (SocketException)
-                {
-                    Console.Clear();
-                    Console.WriteLine("Connection attempts: {0}", attempts.ToString());
-                }
+                int received = socket.EndReceive(AR);
 
-                Console.Clear();
-                Console.WriteLine("Connected...");
+                byte[] dataBuf = new byte[received];
+                Array.Copy(_buffer, dataBuf, received);
+
+                string text = Encoding.ASCII.GetString(dataBuf);
+                Console.WriteLine("Text received: {0}", text);
+
+                // HANDLE REQUEST
+
+                socket.BeginReceive(_buffer, 0, _buffer.Length, SocketFlags.None, new AsyncCallback(ReceiveCallback), socket);
             }
+            catch (SocketException) { Console.WriteLine("Server unexpectedly disconnected..."); }
         }
-*/
 
         private static void SendLoop()
         {
@@ -88,13 +86,15 @@ namespace da_rat
                 byte[] buffer = Encoding.ASCII.GetBytes(req);
                 _clientSocket.Send(buffer);
 
-                byte[] recBuf = new byte[2048];
-                int rec = _clientSocket.Receive(recBuf);
+                // byte[] recBuf = new byte[2048];
+                // int rec = _clientSocket.Receive(recBuf);
 
-                byte[] data = new byte[rec];
-                Array.Copy(recBuf, data, rec);
+                // byte[] data = new byte[rec];
+                // Array.Copy(recBuf, data, rec);
 
-                Console.WriteLine("Received: {0}", Encoding.ASCII.GetString(data));
+                // Console.WriteLine("Received: {0}", Encoding.ASCII.GetString(data));
+
+                _clientSocket.BeginReceive(_buffer, 0, _buffer.Length, SocketFlags.None, new AsyncCallback(ReceiveCallback), _clientSocket);
             }
         }
     }

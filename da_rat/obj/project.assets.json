@@ -572,10 +572,10 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "c:\\Users\\tzeki\\VB_shared\\projs\\ratty\\da_rat\\da_rat.csproj",
+      "projectUniqueName": "C:\\Users\\tzeki\\VB_shared\\projs\\ratty\\da_rat\\da_rat.csproj",
       "projectName": "da_rat",
-      "projectPath": "c:\\Users\\tzeki\\VB_shared\\projs\\ratty\\da_rat\\da_rat.csproj",
-      "outputPath": "c:\\Users\\tzeki\\VB_shared\\projs\\ratty\\da_rat\\obj\\",
+      "projectPath": "C:\\Users\\tzeki\\VB_shared\\projs\\ratty\\da_rat\\da_rat.csproj",
+      "outputPath": "C:\\Users\\tzeki\\VB_shared\\projs\\ratty\\da_rat\\obj\\",
       "projectStyle": "PackageReference",
       "originalTargetFrameworks": [
         "netcoreapp2.0"

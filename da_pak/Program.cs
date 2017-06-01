@@ -2,9 +2,8 @@
 using System.Text;
 using System.Net;
 using System.Net.Sockets;
-using System.IO;
-using System.Collections.Generic;
 using System.Threading;
+using System.Collections.Generic;
 
 namespace da_pak
 {
@@ -99,8 +98,10 @@ namespace da_pak
                 byte[] data = Encoding.ASCII.GetBytes(input);
                 
                 foreach(var sok in _clientSockets)
+                {
                     sok.BeginSend(data, 0, data.Length, SocketFlags.None, new AsyncCallback(SendCallback), sok);
-                
+                    // sok.BeginReceive(_buffer, 0, _buffer.Length, SocketFlags.None, new AsyncCallback(ReceiveCallback), sok);
+                }
             }
         }
     }
