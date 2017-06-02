@@ -5,23 +5,43 @@ using System.Net.Sockets;
 using System.IO;
 using System.Threading;
 
+using da_box;
+
+/** [ ] Messaage log query
+ */
+
 namespace da_rat
 {
     class Rat
     {
+        /* Dafuq is this good for ? */
         private static ManualResetEvent _connectDone = new ManualResetEvent(false);
 
         private static byte[] _buffer = new byte[2048];
         private static Socket _clientSocket =
             new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+
         
         static void Main(string[] args)
         {
             Console.Title = "Rat";
 
-            // LoopConnect();
-            ConnectAsync();
-            SendLoop();
+            Box.pith tb = new Box.pith();
+            Console.WriteLine(tb._path);
+
+            // ConnectAsync();
+            // SendLoop();
+            string[] input;
+            while(true)
+            {
+                Console.Write("> ");
+                input = Console.ReadLine().Trim().Split();
+                
+                if (input[0] == "exit")        break;
+                else if (input[0] == "dir")    Console.WriteLine(tb.Dir());
+                else if (input[0] == "cd")     tb.Cd(input[1]);
+                else                           Console.WriteLine("Invalid input...");
+            }
 
             Console.WriteLine("Exiting...");
             Console.ReadLine();
@@ -64,7 +84,7 @@ namespace da_rat
                 Array.Copy(_buffer, dataBuf, received);
 
                 string text = Encoding.ASCII.GetString(dataBuf);
-                Console.WriteLine("Text received: {0}", text);
+                // Console.WriteLine("Text received: {0}", text);
 
                 // HANDLE REQUEST
 

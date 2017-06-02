@@ -13,11 +13,11 @@ namespace da_pak
         private static List<Socket> _clientSockets = new List<Socket>();
         private static Socket _serverSocket = new Socket
             (AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
-        
+
         static void Main(string[] args)
         {
             Console.Title = "Pak";
-            
+
             SetupServer();
             SendLoop();
 
@@ -37,7 +37,7 @@ namespace da_pak
         private static void AcceptCallback(IAsyncResult AR)
         {
             Socket socket = _serverSocket.EndAccept(AR);
-            
+
             _clientSockets.Add(socket);
             Console.WriteLine("Client connected...");
             socket.BeginReceive(_buffer, 0, _buffer.Length, SocketFlags.None, new AsyncCallback(ReceiveCallback), socket);
@@ -57,7 +57,7 @@ namespace da_pak
                 Array.Copy(_buffer, dataBuf, received);
 
                 string text = Encoding.ASCII.GetString(dataBuf);
-                Console.WriteLine("Text received: {0}", text); 
+                // Console.WriteLine("Text received: {0}", text); 
 
                 // HANDLE REQUEST
 
@@ -94,9 +94,9 @@ namespace da_pak
 
                 if (input == "break" || input == "exit")
                     break;
-                
+
                 byte[] data = Encoding.ASCII.GetBytes(input);
-                
+
                 foreach(var sok in _clientSockets)
                 {
                     sok.BeginSend(data, 0, data.Length, SocketFlags.None, new AsyncCallback(SendCallback), sok);
