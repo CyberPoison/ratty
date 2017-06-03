@@ -7,7 +7,7 @@ using System.Threading;
 using System.Collections.Generic;
 
 /** FEATURES
- * [ ] directory navigation (dir, cd)
+ * [x] directory navigation (dir, cd)
  * [ ] ftp (open port, send ip+port to server, up- & download)
  * [ ] screenshot utility
  * [ ] get mouse input / position
@@ -18,9 +18,9 @@ namespace da_box
 {
     public class Box
     {
-        public class pith
+        public class Nav
         {
-            public string _path;
+            private string _path;
             private List<string> dirs;
             private List<string> fils;
 
@@ -35,7 +35,7 @@ namespace da_box
                 this.fils = new List<string>(Directory.EnumerateFiles(_path));
             }
 
-            public pith(string path = "")
+            public Nav(string path = "")
             {
                 this._path = "";
                 this.dirs = null;
@@ -67,8 +67,7 @@ namespace da_box
                         Initialize(dir);
                         return true;
                     }
-                
-                Console.WriteLine("Directory not found.");
+
                 return false;
             }
         }

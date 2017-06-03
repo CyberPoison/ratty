@@ -5,6 +5,11 @@ using System.Net.Sockets;
 using System.Threading;
 using System.Collections.Generic;
 
+/**
+ * [ ] Have the option to communicate with either 1 or all connected clients.
+ * [ ] Tasks ? for disconnected clients ?
+ */
+
 namespace da_pak
 {
     class Pak
@@ -13,6 +18,20 @@ namespace da_pak
         private static List<Socket> _clientSockets = new List<Socket>();
         private static Socket _serverSocket = new Socket
             (AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+
+        private struct Client
+        {
+            public string hostName;
+            public string hostAddr;
+            public Socket hostSock;
+
+            public Client(Socket sock, string addr, string naem)
+            {
+                hostSock = sock;
+                hostName = naem;
+                hostAddr = addr;
+            }
+        }
 
         static void Main(string[] args)
         {
@@ -57,9 +76,8 @@ namespace da_pak
                 Array.Copy(_buffer, dataBuf, received);
 
                 string text = Encoding.ASCII.GetString(dataBuf);
-                // Console.WriteLine("Text received: {0}", text); 
+                Console.WriteLine(text); 
 
-                // HANDLE REQUEST
 
                 string response = string.Empty;
                 if (text.ToLower() != "get time")
@@ -71,12 +89,13 @@ namespace da_pak
                     response = DateTime.Now.ToLongTimeString();
                 }
 
+
                 byte[] data = Encoding.ASCII.GetBytes(response);
                 socket.BeginSend(data, 0, data.Length, SocketFlags.None, new AsyncCallback(SendCallback), socket);
 
                 socket.BeginReceive(_buffer, 0, _buffer.Length, SocketFlags.None, new AsyncCallback(ReceiveCallback), socket);
             }
-            catch (SocketException) { Console.WriteLine("Client unexpectedly disconnected..."); }
+            catch (SocketException) { Console.WriteLine("Client disconnected..."); }
         }
 
         private static void SendCallback(IAsyncResult AR)
@@ -98,10 +117,7 @@ namespace da_pak
                 byte[] data = Encoding.ASCII.GetBytes(input);
 
                 foreach(var sok in _clientSockets)
-                {
                     sok.BeginSend(data, 0, data.Length, SocketFlags.None, new AsyncCallback(SendCallback), sok);
-                    // sok.BeginReceive(_buffer, 0, _buffer.Length, SocketFlags.None, new AsyncCallback(ReceiveCallback), sok);
-                }
             }
         }
     }
