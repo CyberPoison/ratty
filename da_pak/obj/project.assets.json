@@ -204,7 +204,7 @@
   },
   "libraries": {
     "Microsoft.NETCore.App/2.0.0-preview1-002111-00": {
-      "sha512": "EyPneg0RIxlxS7djwVHmtC538257HUbMYAtChnt01gC0/QX/QtxbhMS+WW7ZENAa4KrKDNjtYkbZOVq1MpokHQ==",
+      "sha512": "trpYw0Ch0bEM1conPyynWfuVqZ8NBeiyOo/s75HXuTBInQLD/3fnTfg8/8bmsCT6jD5JEys+OdnkxFKxtIdULQ==",
       "type": "package",
       "path": "microsoft.netcore.app/2.0.0-preview1-002111-00",
       "files": [
@@ -358,7 +358,7 @@
       ]
     },
     "Microsoft.NETCore.DotNetAppHost/2.0.0-preview1-002111-00": {
-      "sha512": "cE62O4m+IHR0pql96hT/qC+MIdlKw2UazvHsUjtzZfsAyEgFbD1iG9M8rNAIoxwjQTQiG/gW0EtvSMKaLqgjPA==",
+      "sha512": "6gW4JyKa2NJwcPEorW7gye5tDB0JKUs/LIWbbP8qoURrebqPqLhj1pt0XHpqq9Tpnk217tzX09fbGPAB9Vpu+Q==",
       "type": "package",
       "path": "microsoft.netcore.dotnetapphost/2.0.0-preview1-002111-00",
       "files": [
@@ -370,7 +370,7 @@
       ]
     },
     "Microsoft.NETCore.DotNetHostPolicy/2.0.0-preview1-002111-00": {
-      "sha512": "eFgnZCMME49Nwd5c5YufXA/neezvJsg/X6gxwvG5aYOcOGecfKhgqnPJk0rrQjdhHIj9aRAgDSd21dEVbsQQoQ==",
+      "sha512": "2iUpoI8KX67vMyUfxlUVKHzmDm+D741tLXfWsOmCVWIG30UrNtOJgggfG6cw4JwrNuBTZBbdiM264YdfrcTAKg==",
       "type": "package",
       "path": "microsoft.netcore.dotnethostpolicy/2.0.0-preview1-002111-00",
       "files": [
@@ -382,7 +382,7 @@
       ]
     },
     "Microsoft.NETCore.DotNetHostResolver/2.0.0-preview1-002111-00": {
-      "sha512": "8+Od7XcvAgNrirXJEj6rwlzKvwAbIkQLRYWQvK06Jz5/fvvwuBaU3hKON/XzRBmajAYTmF76clIvxlbLAjjAGA==",
+      "sha512": "mCvSHky29a+VifSq+gvQX7mwPcSZEFbssH+Ot/ZVBUfzsVJsCSDOEFvXdNfB3FZPXxb5vMiKfboppbumfWNuPw==",
       "type": "package",
       "path": "microsoft.netcore.dotnethostresolver/2.0.0-preview1-002111-00",
       "files": [
@@ -394,7 +394,7 @@
       ]
     },
     "Microsoft.NETCore.Platforms/2.0.0-preview1-25305-02": {
-      "sha512": "JmLAcTjasUiZSaitcOaPi/kmkJpdEZv6sQRON9Vg4djRgCRmwd85fzVy8d68m22o4Mp1BUqRYjFoX+hXlNODAw==",
+      "sha512": "o3uKs+ZRvD4abYJGPiJy8uB19R2Pkx7NfP1rqTyTllI2wvd0CUjMLK6O34/MumiIsF1xY4TpJ5sypjmyHlBtZQ==",
       "type": "package",
       "path": "microsoft.netcore.platforms/2.0.0-preview1-25305-02",
       "files": [
@@ -409,7 +409,7 @@
       ]
     },
     "Microsoft.Packaging.Tools/1.0.0-preview1-25301-01": {
-      "sha512": "N/6VB5BZeTJb5g9hnrlNk4iIVYkZX9vXgWRu0BlpzrZklK/vU9jSbcAVJwnXFMuDVkPiiI9zqSvUbpYx6fVm8w==",
+      "sha512": "xBggMp06nCNBTPtoTxljLbKAoX8QWbBzx91d999OURi3QOVtu0wVhFdAkJgt0LXjZJ+37WKC3QmJJ/RtHvTdHg==",
       "type": "package",
       "path": "microsoft.packaging.tools/1.0.0-preview1-25301-01",
       "files": [
@@ -434,7 +434,7 @@
       ]
     },
     "NETStandard.Library/2.0.0-preview1-25301-01": {
-      "sha512": "dcvMpgEvS0vvHXglh9HdY/K91lFhqVNW7ZTki8l8f3PDNzhGRutvBFJGg5PwXGm1TtedYeEEdB4SVsJKtufhlA==",
+      "sha512": "GM5peEuEaiQv8nEZ/923S5vAx//HhXl8eer+zsJSBcxM6ik+mzplZ/dp17RCwFXZjA5voWOAZ0UMUx8cZWUAaw==",
       "type": "package",
       "path": "netstandard.library/2.0.0-preview1-25301-01",
       "files": [
@@ -572,10 +572,10 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "c:\\Users\\tzeki\\VB_shared\\projs\\ratty\\da_pak\\da_pak.csproj",
+      "projectUniqueName": "E:\\projs\\ratty\\da_pak\\da_pak.csproj",
       "projectName": "da_pak",
-      "projectPath": "c:\\Users\\tzeki\\VB_shared\\projs\\ratty\\da_pak\\da_pak.csproj",
-      "outputPath": "c:\\Users\\tzeki\\VB_shared\\projs\\ratty\\da_pak\\obj\\",
+      "projectPath": "E:\\projs\\ratty\\da_pak\\da_pak.csproj",
+      "outputPath": "E:\\projs\\ratty\\da_pak\\obj\\",
       "projectStyle": "PackageReference",
       "originalTargetFrameworks": [
         "netcoreapp2.0"

