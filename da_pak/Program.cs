@@ -100,6 +100,8 @@ namespace da_pak
 
                 string text = Encoding.ASCII.GetString(dataBuf);
 
+                /* RESPONSE */
+                
                 string response = string.Empty;
                 if (text.ToLower().Split()[0] == "info")
                 {
