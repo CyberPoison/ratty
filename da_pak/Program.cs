@@ -128,7 +128,20 @@ namespace da_pak
                         _rats.Add( new Rat(socket, text) );
                         response = "INFO Rat added to the pak";
 
+<<<<<<< HEAD
                         text = text.Insert(0, "Client connected... ");
+=======
+                /* RESPONSE */
+                
+                string response = string.Empty;
+                if (text.ToLower().Split()[0] == "info")
+                {
+                    _rats.Add( new Rat(socket, text) );
+                    response = "Rat added to the pak";
+                    byte[] data = Encoding.ASCII.GetBytes(response);
+                    socket.BeginSend(data, 0, data.Length, SocketFlags.None, new AsyncCallback(SendCallback), socket);
+                }
+>>>>>>> 8a1f956484e745431adb49148fa488e197f95f3a
 
                         SendMessage(response, socket, false);
                     }
