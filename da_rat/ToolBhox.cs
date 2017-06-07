@@ -6,6 +6,7 @@ using System.IO;
 using System.Threading;
 using System.Collections.Generic;
 using System.Drawing;
+using System.Diagnostics;
 
 /** FEATURES
  * [x] directory navigation (dir, cd)
@@ -53,6 +54,9 @@ namespace da_box
             return output;
         }
 
+        /**
+         * 
+         */
         public bool Cd(string d)
         {
             if (d == "..")
@@ -68,6 +72,30 @@ namespace da_box
                 }
 
             return false;
+        }
+
+        public bool DoesFileExist(string file)
+        {
+            foreach (var fil in fils)
+                if (file == fil.Remove(0, _path.Length+1))
+                    return true;
+
+            return false;
+        }
+
+        public bool RunCommand(string cmd)
+        {
+            try { Process.Start("cmd", "/C " + cmd); return true;  }
+            catch                                  { return false; }
+        }
+
+        public string FileToByte(string file)
+        {
+            /* headerSize ... */
+            if (DoesFileExist(file))
+                return (5 + file.Length + 3).ToString() + " " + File.ReadAllText(_path + file);
+            
+            return "empty";
         }
     }
 }
