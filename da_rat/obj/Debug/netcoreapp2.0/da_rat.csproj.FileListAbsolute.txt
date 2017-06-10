@@ -1,9 +1,0 @@
-E:\projs\ratty\da_rat\bin\Debug\netcoreapp2.0\da_rat.deps.json
-E:\projs\ratty\da_rat\bin\Debug\netcoreapp2.0\da_rat.runtimeconfig.json
-E:\projs\ratty\da_rat\bin\Debug\netcoreapp2.0\da_rat.runtimeconfig.dev.json
-E:\projs\ratty\da_rat\bin\Debug\netcoreapp2.0\da_rat.dll
-E:\projs\ratty\da_rat\bin\Debug\netcoreapp2.0\da_rat.pdb
-E:\projs\ratty\da_rat\obj\Debug\netcoreapp2.0\da_rat.csproj.CoreCompileInputs.cache
-E:\projs\ratty\da_rat\obj\Debug\netcoreapp2.0\da_rat.AssemblyInfo.cs
-E:\projs\ratty\da_rat\obj\Debug\netcoreapp2.0\da_rat.dll
-E:\projs\ratty\da_rat\obj\Debug\netcoreapp2.0\da_rat.pdb
